@@ -15,9 +15,8 @@ import SmoothScroll from './components/SmoothScroll'
 
 function App() {
   const { isLoggedIn } = useAuth();
-  const { isLoading, isSaving, saveStatus, isFirebaseConnected } = useContent();
+  const { isLoading, isSaving, saveStatus, isCloudConnected } = useContent();
 
-  // Show loading screen while content loads
   if (isLoading) {
     return (
       <div style={{
@@ -25,18 +24,12 @@ function App() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'var(--bg-dark)',
-        color: 'var(--text-primary)'
+        background: '#0a0a0f',
+        color: '#f8fafc'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{
-            fontSize: '4rem',
-            marginBottom: '20px',
-            animation: 'pulse 1.5s infinite'
-          }}>
-            ⚡
-          </div>
-          <p style={{ color: 'var(--text-secondary)' }}>Loading portfolio...</p>
+          <div style={{ fontSize: '4rem', marginBottom: '20px' }}>⚡</div>
+          <p style={{ color: '#94a3b8' }}>Loading portfolio...</p>
         </div>
       </div>
     );
@@ -45,88 +38,74 @@ function App() {
   return (
     <SmoothScroll>
       <div className="app">
-        {/* Particle Background */}
         <ParticleBackground />
-
-        {/* Custom Cursor */}
         <CustomCursor />
 
         <Navbar />
         <LoginModal />
 
-        {/* Edit Mode Banner */}
         {isLoggedIn && (
           <div className="edit-mode-banner">
             ⚡ Edit Mode Active - Click to edit
           </div>
         )}
 
-        {/* Save Status Indicator */}
+        {/* Saving indicator */}
         {isSaving && (
           <div style={{
             position: 'fixed',
             bottom: '80px',
             right: '20px',
             padding: '12px 20px',
-            background: 'rgba(139, 92, 246, 0.9)',
+            background: 'rgba(139, 92, 246, 0.95)',
             borderRadius: '10px',
             color: 'white',
             fontSize: '0.9rem',
             fontWeight: '500',
             zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            boxShadow: 'var(--shadow-glow-purple)'
+            boxShadow: '0 0 20px rgba(139, 92, 246, 0.5)'
           }}>
-            <span style={{ animation: 'spin 1s linear infinite' }}>⏳</span>
-            Saving to cloud...
+            ⏳ Saving to cloud...
           </div>
         )}
 
-        {/* Save Success Indicator */}
+        {/* Save success */}
         {saveStatus === 'success' && !isSaving && (
           <div style={{
             position: 'fixed',
             bottom: '80px',
             right: '20px',
             padding: '12px 20px',
-            background: 'rgba(16, 185, 129, 0.9)',
+            background: 'rgba(16, 185, 129, 0.95)',
             borderRadius: '10px',
             color: 'white',
             fontSize: '0.9rem',
             fontWeight: '500',
             zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
             boxShadow: '0 0 20px rgba(16, 185, 129, 0.5)'
           }}>
-            ✅ Saved! Changes visible to everyone
+            ✅ Saved! Visible to everyone
           </div>
         )}
 
-        {/* Firebase Connection Status (shown only in edit mode) */}
+        {/* Cloud status (edit mode only) */}
         {isLoggedIn && (
           <div style={{
             position: 'fixed',
             bottom: '20px',
             right: '20px',
             padding: '10px 16px',
-            background: isFirebaseConnected
+            background: isCloudConnected
               ? 'rgba(16, 185, 129, 0.2)'
               : 'rgba(249, 115, 22, 0.2)',
-            border: `1px solid ${isFirebaseConnected ? 'rgba(16, 185, 129, 0.5)' : 'rgba(249, 115, 22, 0.5)'}`,
+            border: `1px solid ${isCloudConnected ? 'rgba(16, 185, 129, 0.5)' : 'rgba(249, 115, 22, 0.5)'}`,
             borderRadius: '10px',
-            color: isFirebaseConnected ? '#10b981' : '#f97316',
+            color: isCloudConnected ? '#10b981' : '#f97316',
             fontSize: '0.85rem',
             fontWeight: '500',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
+            zIndex: 1000
           }}>
-            {isFirebaseConnected ? '☁️ Cloud Connected' : '💾 Local Storage Only'}
+            {isCloudConnected ? '☁️ JSONBin Connected' : '💾 Local Only (Add API key)'}
           </div>
         )}
 

@@ -10,27 +10,21 @@ const EditableMedia = ({
     style = {}
 }) => {
     const { isLoggedIn } = useAuth();
-    const { uploadImageFile, uploadVideoFile, isFirebaseConnected } = useContent();
+    const { processMediaUrl, isCloudConnected } = useContent();
     const [isEditing, setIsEditing] = useState(false);
+    const [inputMode, setInputMode] = useState('url'); // 'url' or 'file'
+    const [urlInput, setUrlInput] = useState('');
     const [preview, setPreview] = useState(null);
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState('');
-    const [selectedFile, setSelectedFile] = useState(null);
     const fileInputRef = useRef(null);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Check file size (limit: 50MB for Firebase, 5MB for localStorage)
-            const maxSize = isFirebaseConnected ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
-            if (file.size > maxSize) {
-                alert(`File size must be less than ${isFirebaseConnected ? '50MB' : '5MB'}.`);
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB. For larger files, upload to Google Drive and paste the link.');
                 return;
             }
 
-            setSelectedFile(file);
-
-            // Create preview
             const reader = new FileReader();
             reader.onloadend = () => {
                 setPreview(reader.result);
@@ -39,54 +33,36 @@ const EditableMedia = ({
         }
     };
 
-    const handleSave = async () => {
-        if (!preview && !selectedFile) return;
-
-        setIsUploading(true);
-        try {
-            let finalUrl;
-
-            if (selectedFile && isFirebaseConnected) {
-                // Upload to Firebase
-                setUploadProgress('Uploading to cloud...');
-                const uploadFn = type === 'image' ? uploadImageFile : uploadVideoFile;
-                finalUrl = await uploadFn(selectedFile);
-
-                if (!finalUrl) {
-                    throw new Error('Upload failed');
-                }
-                setUploadProgress('Upload complete!');
-            } else {
-                // Use base64 for localStorage (fallback)
-                finalUrl = preview;
-            }
-
-            onSave(finalUrl);
-            setIsEditing(false);
-            setPreview(null);
-            setSelectedFile(null);
-            setUploadProgress('');
-        } catch (error) {
-            console.error('Upload error:', error);
-            alert('Failed to upload. Please try again.');
-            setUploadProgress('');
-        } finally {
-            setIsUploading(false);
+    const handleUrlPreview = () => {
+        if (urlInput.trim()) {
+            const processedUrl = processMediaUrl(urlInput.trim());
+            setPreview(processedUrl);
         }
+    };
+
+    const handleSave = () => {
+        if (preview) {
+            onSave(preview);
+        } else if (urlInput.trim()) {
+            const processedUrl = processMediaUrl(urlInput.trim());
+            onSave(processedUrl);
+        }
+        setIsEditing(false);
+        setPreview(null);
+        setUrlInput('');
     };
 
     const handleCancel = () => {
         setIsEditing(false);
         setPreview(null);
-        setSelectedFile(null);
-        setUploadProgress('');
+        setUrlInput('');
     };
 
     const handleRemove = () => {
         onSave(null);
         setIsEditing(false);
         setPreview(null);
-        setSelectedFile(null);
+        setUrlInput('');
     };
 
     const displayValue = preview || value;
@@ -94,51 +70,154 @@ const EditableMedia = ({
     if (isEditing) {
         return (
             <div className="glass-card" style={{ padding: '24px', ...style }}>
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept={type === 'image' ? 'image/*' : 'video/*'}
-                    style={{ display: 'none' }}
-                />
-
-                {/* Firebase status indicator */}
+                {/* Mode Toggle */}
                 <div style={{
                     display: 'flex',
-                    alignItems: 'center',
                     gap: '8px',
-                    marginBottom: '16px',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    background: isFirebaseConnected
-                        ? 'rgba(16, 185, 129, 0.1)'
-                        : 'rgba(249, 115, 22, 0.1)',
-                    border: `1px solid ${isFirebaseConnected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(249, 115, 22, 0.3)'}`
+                    marginBottom: '16px'
                 }}>
-                    <span style={{ fontSize: '14px' }}>
-                        {isFirebaseConnected ? '☁️' : '💾'}
-                    </span>
-                    <span style={{
-                        fontSize: '0.85rem',
-                        color: isFirebaseConnected ? '#10b981' : '#f97316'
-                    }}>
-                        {isFirebaseConnected
-                            ? 'Cloud storage enabled - visible to everyone'
-                            : 'Local storage only - only visible to you'}
-                    </span>
+                    <button
+                        onClick={() => setInputMode('url')}
+                        style={{
+                            flex: 1,
+                            padding: '10px',
+                            border: 'none',
+                            borderRadius: '8px',
+                            background: inputMode === 'url'
+                                ? 'var(--gradient-primary)'
+                                : 'rgba(139, 92, 246, 0.1)',
+                            color: inputMode === 'url' ? 'white' : 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            fontWeight: '500',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        🔗 URL / Link
+                    </button>
+                    <button
+                        onClick={() => setInputMode('file')}
+                        style={{
+                            flex: 1,
+                            padding: '10px',
+                            border: 'none',
+                            borderRadius: '8px',
+                            background: inputMode === 'file'
+                                ? 'var(--gradient-primary)'
+                                : 'rgba(139, 92, 246, 0.1)',
+                            color: inputMode === 'file' ? 'white' : 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            fontWeight: '500',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        📁 Upload File
+                    </button>
                 </div>
 
-                {displayValue ? (
+                {/* URL Input Mode */}
+                {inputMode === 'url' && (
                     <div style={{ marginBottom: '16px' }}>
+                        <input
+                            type="text"
+                            value={urlInput}
+                            onChange={(e) => setUrlInput(e.target.value)}
+                            placeholder={type === 'image'
+                                ? "Paste image URL or Google Drive link..."
+                                : "Paste video URL or Google Drive link..."}
+                            style={{
+                                width: '100%',
+                                padding: '12px 16px',
+                                borderRadius: '10px',
+                                border: '1px solid var(--border-glass)',
+                                background: 'rgba(15, 15, 25, 0.8)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.95rem',
+                                marginBottom: '8px'
+                            }}
+                        />
+                        <button
+                            onClick={handleUrlPreview}
+                            disabled={!urlInput.trim()}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                border: 'none',
+                                borderRadius: '8px',
+                                background: urlInput.trim() ? 'rgba(34, 211, 238, 0.2)' : 'rgba(100, 100, 100, 0.2)',
+                                color: urlInput.trim() ? 'var(--accent)' : 'var(--text-muted)',
+                                cursor: urlInput.trim() ? 'pointer' : 'not-allowed',
+                                fontWeight: '500'
+                            }}
+                        >
+                            👁️ Preview
+                        </button>
+
+                        {/* Google Drive Instructions */}
+                        <div style={{
+                            marginTop: '12px',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            background: 'rgba(139, 92, 246, 0.1)',
+                            border: '1px solid rgba(139, 92, 246, 0.2)',
+                            fontSize: '0.85rem',
+                            color: 'var(--text-secondary)'
+                        }}>
+                            <strong style={{ color: 'var(--primary)' }}>💡 Tip:</strong>
+                            <ol style={{ margin: '8px 0 0 16px', padding: 0 }}>
+                                <li>Upload {type} to Google Drive</li>
+                                <li>Right-click → "Share" → "Anyone with link"</li>
+                                <li>Copy link & paste here</li>
+                            </ol>
+                        </div>
+                    </div>
+                )}
+
+                {/* File Upload Mode */}
+                {inputMode === 'file' && (
+                    <div style={{ marginBottom: '16px' }}>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept={type === 'image' ? 'image/*' : 'video/*'}
+                            style={{ display: 'none' }}
+                        />
+                        <div
+                            className="file-upload"
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <span style={{ fontSize: '2rem' }}>{type === 'image' ? '🖼️' : '🎬'}</span>
+                            <p>Click to upload {type}</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                Max 5MB (for larger files, use URL mode with Google Drive)
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Preview */}
+                {displayValue && (
+                    <div style={{ marginBottom: '16px' }}>
+                        <p style={{
+                            color: 'var(--text-muted)',
+                            fontSize: '0.85rem',
+                            marginBottom: '8px'
+                        }}>
+                            Preview:
+                        </p>
                         {type === 'image' ? (
                             <img
                                 src={displayValue}
                                 alt="Preview"
                                 style={{
                                     maxWidth: '100%',
-                                    maxHeight: '300px',
+                                    maxHeight: '250px',
                                     borderRadius: '12px',
                                     objectFit: 'contain'
+                                }}
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    alert('Unable to load image. Please check the URL.');
                                 }}
                             />
                         ) : (
@@ -147,85 +226,56 @@ const EditableMedia = ({
                                 controls
                                 style={{
                                     maxWidth: '100%',
-                                    maxHeight: '300px',
+                                    maxHeight: '250px',
                                     borderRadius: '12px'
                                 }}
                             />
                         )}
                     </div>
-                ) : (
-                    <div
-                        className="file-upload"
-                        onClick={() => fileInputRef.current?.click()}
-                        style={{ marginBottom: '16px' }}
-                    >
-                        <span className="file-upload-icon">{type === 'image' ? '🖼️' : '🎬'}</span>
-                        <p>Click to upload {type}</p>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                            Max {isFirebaseConnected ? '50MB' : '5MB'}
-                        </p>
-                    </div>
                 )}
 
-                {displayValue && (
-                    <button
-                        className="btn btn-secondary"
-                        onClick={() => fileInputRef.current?.click()}
-                        style={{ width: '100%', marginBottom: '12px' }}
-                    >
-                        📁 Choose Different File
-                    </button>
-                )}
+                {/* Cloud Status */}
+                <div style={{
+                    marginBottom: '16px',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    background: isCloudConnected
+                        ? 'rgba(16, 185, 129, 0.1)'
+                        : 'rgba(249, 115, 22, 0.1)',
+                    border: `1px solid ${isCloudConnected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(249, 115, 22, 0.3)'}`,
+                    fontSize: '0.85rem',
+                    color: isCloudConnected ? '#10b981' : '#f97316',
+                    textAlign: 'center'
+                }}>
+                    {isCloudConnected
+                        ? '☁️ Cloud storage enabled - URL will be saved permanently'
+                        : '💾 Local storage only - ask admin to configure cloud'}
+                </div>
 
-                {!displayValue && (
-                    <button
-                        className="btn btn-secondary"
-                        onClick={() => fileInputRef.current?.click()}
-                        style={{ width: '100%', marginBottom: '12px' }}
-                    >
-                        📁 Choose File
-                    </button>
-                )}
-
-                {/* Upload progress */}
-                {uploadProgress && (
-                    <div style={{
-                        padding: '12px',
-                        marginBottom: '12px',
-                        borderRadius: '8px',
-                        background: 'rgba(139, 92, 246, 0.1)',
-                        border: '1px solid rgba(139, 92, 246, 0.3)',
-                        textAlign: 'center',
-                        color: 'var(--primary)'
-                    }}>
-                        ⏳ {uploadProgress}
-                    </div>
-                )}
-
+                {/* Action Buttons */}
                 <div style={{ display: 'flex', gap: '8px' }}>
                     <button
                         className="btn btn-primary"
                         onClick={handleSave}
-                        disabled={!preview || isUploading}
+                        disabled={!preview && !urlInput.trim()}
                         style={{ flex: 1 }}
                     >
-                        {isUploading ? '⏳ Uploading...' : '✓ Save'}
+                        ✓ Save
                     </button>
                     {value && (
                         <button
                             className="btn btn-secondary"
                             onClick={handleRemove}
-                            style={{ background: 'rgba(239, 68, 68, 0.2)', borderColor: '#ef4444' }}
-                            disabled={isUploading}
+                            style={{
+                                background: 'rgba(239, 68, 68, 0.2)',
+                                borderColor: '#ef4444',
+                                color: '#ef4444'
+                            }}
                         >
                             🗑️
                         </button>
                     )}
-                    <button
-                        className="btn btn-secondary"
-                        onClick={handleCancel}
-                        disabled={isUploading}
-                    >
+                    <button className="btn btn-secondary" onClick={handleCancel}>
                         ✕
                     </button>
                 </div>
@@ -265,7 +315,7 @@ const EditableMedia = ({
         );
     }
 
-    // Placeholder when no media
+    // Placeholder
     return (
         <div
             className={isLoggedIn ? 'editable' : ''}

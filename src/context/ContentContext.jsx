@@ -1,11 +1,10 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import {
-    loadContentFromFirebase,
-    saveContentToFirebase,
-    isFirebaseReady,
-    uploadImage,
-    uploadVideo
-} from '../firebase/config';
+    loadContentFromCloud,
+    saveContentToCloud,
+    isCloudReady,
+    convertGoogleDriveLink
+} from '../storage/jsonbin';
 
 const ContentContext = createContext();
 
@@ -171,49 +170,14 @@ const defaultContent = {
         }
     ],
     assignments: [
-        {
-            id: 1,
-            title: "Assignment 1",
-            description: "Details about assignment 1",
-            image: null,
-            link: null
-        },
-        {
-            id: 2,
-            title: "Assignment 2",
-            description: "Details about assignment 2",
-            image: null,
-            link: null
-        },
-        {
-            id: 3,
-            title: "Assignment 3",
-            description: "Details about assignment 3",
-            image: null,
-            link: null
-        },
-        {
-            id: 4,
-            title: "Assignment 4",
-            description: "Details about assignment 4",
-            image: null,
-            link: null
-        },
-        {
-            id: 5,
-            title: "Assignment 5",
-            description: "Details about assignment 5",
-            image: null,
-            link: null
-        }
+        { id: 1, title: "Assignment 1", description: "Details about assignment 1", image: null, link: null },
+        { id: 2, title: "Assignment 2", description: "Details about assignment 2", image: null, link: null },
+        { id: 3, title: "Assignment 3", description: "Details about assignment 3", image: null, link: null },
+        { id: 4, title: "Assignment 4", description: "Details about assignment 4", image: null, link: null },
+        { id: 5, title: "Assignment 5", description: "Details about assignment 5", image: null, link: null }
     ],
     weeklyLearning: [
-        {
-            id: 1,
-            week: 1,
-            title: "Week 1 Learning",
-            content: "Summary of what was learned in week 1..."
-        }
+        { id: 1, week: 1, title: "Week 1 Learning", content: "Summary of what was learned in week 1..." }
     ]
 };
 
@@ -221,18 +185,18 @@ export const ContentProvider = ({ children }) => {
     const [content, setContent] = useState(defaultContent);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    const [saveStatus, setSaveStatus] = useState(null); // 'success', 'error', null
+    const [saveStatus, setSaveStatus] = useState(null);
 
-    // Load content from Firebase on mount
+    // Load content on mount
     useEffect(() => {
         const loadContent = async () => {
             setIsLoading(true);
 
-            // Try Firebase first
-            if (isFirebaseReady()) {
-                const firebaseContent = await loadContentFromFirebase();
-                if (firebaseContent) {
-                    setContent(firebaseContent);
+            // Try cloud storage first
+            if (isCloudReady()) {
+                const cloudContent = await loadContentFromCloud();
+                if (cloudContent) {
+                    setContent(cloudContent);
                     setIsLoading(false);
                     return;
                 }
@@ -242,8 +206,7 @@ export const ContentProvider = ({ children }) => {
             const saved = localStorage.getItem('portfolio_content');
             if (saved) {
                 try {
-                    const parsed = JSON.parse(saved);
-                    setContent(parsed);
+                    setContent(JSON.parse(saved));
                 } catch (e) {
                     console.error('Error parsing localStorage:', e);
                 }
@@ -255,28 +218,25 @@ export const ContentProvider = ({ children }) => {
         loadContent();
     }, []);
 
-    // Save to Firebase and localStorage whenever content changes
+    // Save content when it changes
     useEffect(() => {
-        if (isLoading) return; // Don't save during initial load
+        if (isLoading) return;
 
-        // Always save to localStorage as backup
+        // Always save to localStorage
         localStorage.setItem('portfolio_content', JSON.stringify(content));
 
-        // Save to Firebase (debounced)
-        const saveToFirebase = async () => {
-            if (isFirebaseReady()) {
+        // Save to cloud (debounced)
+        const saveToCloud = async () => {
+            if (isCloudReady()) {
                 setIsSaving(true);
-                const success = await saveContentToFirebase(content);
+                const success = await saveContentToCloud(content);
                 setIsSaving(false);
                 setSaveStatus(success ? 'success' : 'error');
-
-                // Clear status after 3 seconds
                 setTimeout(() => setSaveStatus(null), 3000);
             }
         };
 
-        // Debounce Firebase saves
-        const timeoutId = setTimeout(saveToFirebase, 1000);
+        const timeoutId = setTimeout(saveToCloud, 1500);
         return () => clearTimeout(timeoutId);
     }, [content, isLoading]);
 
@@ -290,10 +250,7 @@ export const ContentProvider = ({ children }) => {
     const updateNestedContent = (section, key, value) => {
         setContent(prev => ({
             ...prev,
-            [section]: {
-                ...prev[section],
-                [key]: value
-            }
+            [section]: { ...prev[section], [key]: value }
         }));
     };
 
@@ -327,9 +284,7 @@ export const ContentProvider = ({ children }) => {
     const updateAssignment = (id, data) => {
         setContent(prev => ({
             ...prev,
-            assignments: prev.assignments.map(assignment =>
-                assignment.id === id ? { ...assignment, ...data } : assignment
-            )
+            assignments: prev.assignments.map(a => a.id === id ? { ...a, ...data } : a)
         }));
     };
 
@@ -347,16 +302,14 @@ export const ContentProvider = ({ children }) => {
     const updateWeeklyLearning = (id, data) => {
         setContent(prev => ({
             ...prev,
-            weeklyLearning: prev.weeklyLearning.map(learning =>
-                learning.id === id ? { ...learning, ...data } : learning
-            )
+            weeklyLearning: prev.weeklyLearning.map(l => l.id === id ? { ...l, ...data } : l)
         }));
     };
 
     const deleteWeeklyLearning = (id) => {
         setContent(prev => ({
             ...prev,
-            weeklyLearning: prev.weeklyLearning.filter(learning => learning.id !== id)
+            weeklyLearning: prev.weeklyLearning.filter(l => l.id !== id)
         }));
     };
 
@@ -365,21 +318,16 @@ export const ContentProvider = ({ children }) => {
         localStorage.removeItem('portfolio_content');
     };
 
-    // File upload functions
-    const uploadImageFile = async (file) => {
-        if (isFirebaseReady()) {
-            return await uploadImage(file);
-        }
-        // Fallback: create local URL (not permanent)
-        return URL.createObjectURL(file);
-    };
+    // Smart URL handler for images/videos
+    const processMediaUrl = (url) => {
+        if (!url) return url;
 
-    const uploadVideoFile = async (file) => {
-        if (isFirebaseReady()) {
-            return await uploadVideo(file);
+        // Convert Google Drive links
+        if (url.includes('drive.google.com')) {
+            return convertGoogleDriveLink(url);
         }
-        // Fallback: create local URL (not permanent)
-        return URL.createObjectURL(file);
+
+        return url;
     };
 
     return (
@@ -388,7 +336,7 @@ export const ContentProvider = ({ children }) => {
             isLoading,
             isSaving,
             saveStatus,
-            isFirebaseConnected: isFirebaseReady(),
+            isCloudConnected: isCloudReady(),
             updateContent,
             updateNestedContent,
             addPeseWeek,
@@ -399,8 +347,7 @@ export const ContentProvider = ({ children }) => {
             updateWeeklyLearning,
             deleteWeeklyLearning,
             resetToDefault,
-            uploadImageFile,
-            uploadVideoFile
+            processMediaUrl
         }}>
             {children}
         </ContentContext.Provider>
