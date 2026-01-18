@@ -19,7 +19,7 @@ const Skills = () => {
                 </motion.div>
 
                 {/* Skills Grid */}
-                <div style={{
+                <div className="skills-grid-responsive" style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(3, 1fr)',
                     gap: '20px',
@@ -74,7 +74,7 @@ const Projects = () => {
                     <p className="section-subtitle">My recent work and achievements</p>
                 </motion.div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginTop: '50px' }}>
+                <div className="projects-grid-responsive" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginTop: '50px' }}>
                     {projects.map((project, index) => (
                         <motion.div
                             key={index}
@@ -86,7 +86,7 @@ const Projects = () => {
                             style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                                <span style={{
+                                <span className="project-period-badge" style={{
                                     display: 'inline-block',
                                     padding: '4px 12px',
                                     background: 'rgba(236, 72, 153, 0.1)',
@@ -97,7 +97,7 @@ const Projects = () => {
                                     {project.period}
                                 </span>
                                 {project.tech && (
-                                    <span style={{
+                                    <span className="project-tech-badge" style={{
                                         padding: '4px 12px',
                                         background: 'rgba(6, 182, 212, 0.1)',
                                         borderRadius: '12px',
@@ -141,7 +141,7 @@ const Projects = () => {
 
                             {/* Project Links */}
                             {(project.github || project.live) && (
-                                <div className="project-links" style={{ marginTop: '16px' }}>
+                                <div className="project-links" style={{ marginTop: '16px', flexWrap: 'wrap' }}>
                                     {project.github && (
                                         <a
                                             href={project.github}
@@ -210,7 +210,7 @@ const Education = () => {
                         🎓 Education
                     </h3>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(educationData.length, 3)}, 1fr)`, gap: '20px' }}>
+                    <div className="education-grid-responsive" style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(educationData.length, 3)}, 1fr)`, gap: '20px' }}>
                         {educationData.map((edu, index) => (
                             <motion.div
                                 key={index}
@@ -257,7 +257,7 @@ const Education = () => {
                     </div>
                 </motion.div>
 
-                <div style={{
+                <div className="education-achievements-grid" style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr 1fr',
                     gap: '40px'
@@ -337,12 +337,13 @@ const Education = () => {
                                             padding: '12px 16px',
                                             background: 'rgba(99, 102, 241, 0.05)',
                                             borderRadius: '12px',
-                                            border: '1px solid rgba(99, 102, 241, 0.1)'
+                                            border: '1px solid rgba(99, 102, 241, 0.1)',
+                                            flexWrap: 'wrap'
                                         }}
                                     >
                                         <span style={{ fontSize: '24px' }}>🎖️</span>
-                                        <div style={{ flex: 1 }}>
-                                            <p style={{ fontWeight: '500', marginBottom: '2px' }}>{cert.name}</p>
+                                        <div style={{ flex: 1, minWidth: '150px' }}>
+                                            <p style={{ fontWeight: '500', marginBottom: '2px', fontSize: '0.95rem' }}>{cert.name}</p>
                                             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{cert.issuer}</p>
                                         </div>
                                         {cert.link && (

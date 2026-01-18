@@ -32,7 +32,7 @@ const About = () => {
                     <p className="section-subtitle">Get to know me better</p>
                 </motion.div>
 
-                <div style={{
+                <div className="about-grid-mobile" style={{
                     display: 'grid',
                     gridTemplateColumns: '300px 1fr',
                     gap: '60px',
@@ -51,6 +51,7 @@ const About = () => {
                             type="image"
                             value={about.photo}
                             onSave={(val) => updateNestedContent('about', 'photo', val)}
+                            className="about-photo-mobile"
                             style={{
                                 width: '250px',
                                 height: '250px',
@@ -106,9 +107,9 @@ const About = () => {
                             </h3>
 
                             <div style={{ display: 'grid', gap: '16px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div className="contact-item-mobile" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <span style={{ fontSize: '24px' }}>📱</span>
-                                    <div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
                                         <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Phone</span>
                                         <EditableText
                                             value={about.contact.phone}
@@ -119,55 +120,55 @@ const About = () => {
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div className="contact-item-mobile" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <span style={{ fontSize: '24px' }}>📧</span>
-                                    <div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
                                         <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Email</span>
                                         <EditableText
                                             value={about.contact.email}
                                             onSave={(val) => updateContact('email', val)}
                                             as="p"
-                                            style={{ fontWeight: '500' }}
+                                            style={{ fontWeight: '500', wordBreak: 'break-all' }}
                                         />
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div className="contact-item-mobile" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <span style={{ fontSize: '24px' }}>💼</span>
-                                    <div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
                                         <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>LinkedIn</span>
                                         <EditableText
                                             value={about.contact.linkedin}
                                             onSave={(val) => updateContact('linkedin', val)}
                                             as="p"
-                                            style={{ fontWeight: '500', wordBreak: 'break-all' }}
+                                            style={{ fontWeight: '500', wordBreak: 'break-all', fontSize: '0.9rem' }}
                                         />
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div className="contact-item-mobile" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <span style={{ fontSize: '24px' }}>🐙</span>
-                                    <div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
                                         <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>GitHub</span>
                                         <EditableText
                                             value={about.contact.github}
                                             onSave={(val) => updateContact('github', val)}
                                             as="p"
-                                            style={{ fontWeight: '500', wordBreak: 'break-all' }}
+                                            style={{ fontWeight: '500', wordBreak: 'break-all', fontSize: '0.9rem' }}
                                         />
                                     </div>
                                 </div>
 
                                 {about.contact.leetcode && (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div className="contact-item-mobile" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <span style={{ fontSize: '24px' }}>💻</span>
-                                        <div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
                                             <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>LeetCode</span>
                                             <EditableText
                                                 value={about.contact.leetcode}
                                                 onSave={(val) => updateContact('leetcode', val)}
                                                 as="p"
-                                                style={{ fontWeight: '500', wordBreak: 'break-all' }}
+                                                style={{ fontWeight: '500', wordBreak: 'break-all', fontSize: '0.9rem' }}
                                             />
                                         </div>
                                     </div>

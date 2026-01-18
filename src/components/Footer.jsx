@@ -25,7 +25,7 @@ const Footer = () => {
                     </p>
                 </motion.div>
 
-                <div style={{
+                <div className="footer-buttons-mobile" style={{
                     display: 'flex',
                     justifyContent: 'center',
                     gap: '20px',

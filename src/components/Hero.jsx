@@ -17,7 +17,7 @@ const Hero = () => {
             paddingTop: '100px'
         }}>
             <div className="container">
-                <div style={{
+                <div className="hero-grid-mobile" style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr 1fr',
                     gap: '60px',
@@ -25,6 +25,7 @@ const Hero = () => {
                 }}>
                     {/* Left Content */}
                     <motion.div
+                        className="hero-content-mobile"
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8 }}
@@ -91,7 +92,7 @@ const Hero = () => {
                             }}
                         />
 
-                        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                        <div className="hero-buttons-mobile" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                             <a href="#about" className="btn btn-primary">
                                 Learn More
                             </a>
@@ -101,7 +102,7 @@ const Hero = () => {
                         </div>
 
                         {/* Social Links */}
-                        <div style={{
+                        <div className="hero-social-mobile" style={{
                             display: 'flex',
                             gap: '16px',
                             marginTop: '40px'

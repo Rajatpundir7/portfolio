@@ -51,7 +51,7 @@ const WeeklyLearning = () => {
                                 }}
                             >
                                 <div
-                                    className="glass-card"
+                                    className="glass-card weekly-card-mobile"
                                     style={{
                                         maxWidth: '600px',
                                         width: '100%',
@@ -69,7 +69,8 @@ const WeeklyLearning = () => {
                                         borderRadius: '20px',
                                         fontSize: '0.85rem',
                                         fontWeight: '600',
-                                        boxShadow: 'var(--shadow-md)'
+                                        boxShadow: 'var(--shadow-md)',
+                                        color: 'white'
                                     }}>
                                         Week {learning.week}
                                     </div>
@@ -79,13 +80,15 @@ const WeeklyLearning = () => {
                                         justifyContent: 'space-between',
                                         alignItems: 'flex-start',
                                         marginTop: '16px',
-                                        marginBottom: '12px'
+                                        marginBottom: '12px',
+                                        flexWrap: 'wrap',
+                                        gap: '8px'
                                     }}>
                                         <EditableText
                                             value={learning.title}
                                             onSave={(val) => updateWeeklyLearning(learning.id, { title: val })}
                                             as="h3"
-                                            style={{ fontSize: '1.2rem' }}
+                                            style={{ fontSize: '1.2rem', flex: 1, minWidth: '150px' }}
                                         />
 
                                         {isLoggedIn && (
@@ -192,11 +195,11 @@ const WeeklyLearning = () => {
                                     />
                                 </div>
 
-                                <div style={{ display: 'flex', gap: '12px' }}>
+                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                                     <button
                                         className="btn btn-primary"
                                         onClick={handleAdd}
-                                        style={{ flex: 1 }}
+                                        style={{ flex: 1, minWidth: '100px' }}
                                     >
                                         ✓ Add
                                     </button>

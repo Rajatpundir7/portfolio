@@ -36,11 +36,11 @@ const PESEBranch = () => {
                 </motion.div>
 
                 {/* Branch Tree Visualization */}
-                <div style={{ marginTop: '50px', position: 'relative' }}>
+                <div className="pese-branch-container" style={{ marginTop: '50px', position: 'relative', marginLeft: '60px' }}>
                     {/* Main trunk line */}
                     <div style={{
                         position: 'absolute',
-                        left: '30px',
+                        left: '-30px',
                         top: 0,
                         bottom: isLoggedIn ? '80px' : 0,
                         width: '4px',
@@ -59,7 +59,6 @@ const PESEBranch = () => {
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
                                 style={{
                                     position: 'relative',
-                                    marginLeft: '60px',
                                     marginBottom: '40px'
                                 }}
                             >
@@ -83,14 +82,14 @@ const PESEBranch = () => {
                                         height: '24px',
                                         background: 'var(--primary)',
                                         borderRadius: '50%',
-                                        border: '4px solid var(--bg-dark)',
+                                        border: '4px solid var(--bg-light)',
                                         boxShadow: '0 0 20px rgba(102, 126, 234, 0.5)'
                                     }}
                                     whileHover={{ scale: 1.2 }}
                                 />
 
-                                {/* Week number badge */}
-                                <div style={{
+                                {/* Week number badge - hidden on mobile */}
+                                <div className="pese-week-vertical" style={{
                                     position: 'absolute',
                                     left: '-80px',
                                     top: '50px',
@@ -105,7 +104,7 @@ const PESEBranch = () => {
                                 </div>
 
                                 {/* Content Card */}
-                                <div className="glass-card" style={{
+                                <div className="glass-card pese-card-grid" style={{
                                     display: 'grid',
                                     gridTemplateColumns: '1fr 1.2fr',
                                     gap: '24px',
@@ -127,7 +126,9 @@ const PESEBranch = () => {
                                             display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'flex-start',
-                                            marginBottom: '12px'
+                                            marginBottom: '12px',
+                                            flexWrap: 'wrap',
+                                            gap: '8px'
                                         }}>
                                             <span style={{
                                                 padding: '6px 14px',
@@ -189,7 +190,6 @@ const PESEBranch = () => {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            style={{ marginLeft: '60px' }}
                         >
                             <button
                                 className="add-button"
@@ -264,11 +264,11 @@ const PESEBranch = () => {
                                     💡 You can add the video after creating the week
                                 </p>
 
-                                <div style={{ display: 'flex', gap: '12px' }}>
+                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                                     <button
                                         className="btn btn-primary"
                                         onClick={handleAddWeek}
-                                        style={{ flex: 1 }}
+                                        style={{ flex: 1, minWidth: '120px' }}
                                     >
                                         ✓ Add Week
                                     </button>

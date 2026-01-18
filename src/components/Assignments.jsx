@@ -38,11 +38,12 @@ const Assignments = () => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 height: '100%',
-                                overflow: 'hidden'
+                                overflow: 'hidden',
+                                position: 'relative'
                             }}
                         >
                             {/* Assignment Number Badge */}
-                            <div style={{
+                            <div className="assignment-number-badge" style={{
                                 position: 'absolute',
                                 top: '-10px',
                                 right: '20px',
@@ -57,7 +58,8 @@ const Assignments = () => {
                                 fontSize: '1.5rem',
                                 fontWeight: '700',
                                 boxShadow: 'var(--shadow-md)',
-                                zIndex: 1
+                                zIndex: 1,
+                                color: 'white'
                             }}>
                                 {assignment.id}
                             </div>
