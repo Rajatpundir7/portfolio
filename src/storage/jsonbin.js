@@ -13,7 +13,7 @@
 // and paste the share links directly when editing
 
 // ⚠️ REPLACE WITH YOUR JSONBIN API KEY ⚠️
-const JSONBIN_API_KEY = "YOUR_JSONBIN_API_KEY";
+const JSONBIN_API_KEY = "$2a$10$8pUUY/53mopf23lp9tpvxemiZjUcaiZkEa1fqd7OrPCoNZkR18WGy";
 
 // This will be auto-created on first save
 let JSONBIN_BIN_ID = localStorage.getItem('portfolio_bin_id') || null;
