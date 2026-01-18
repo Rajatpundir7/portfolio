@@ -8,35 +8,46 @@ import Assignments from './components/Assignments'
 import WeeklyLearning from './components/WeeklyLearning'
 import Footer from './components/Footer'
 import { useAuth } from './context/AuthContext'
+import ParticleBackground from './components/ParticleBackground'
+import CustomCursor from './components/CustomCursor'
+import SmoothScroll from './components/SmoothScroll'
 
 function App() {
   const { isLoggedIn } = useAuth();
 
   return (
-    <div className="app">
-      <Navbar />
-      <LoginModal />
+    <SmoothScroll>
+      <div className="app">
+        {/* Particle Background */}
+        <ParticleBackground />
 
-      {/* Edit Mode Banner */}
-      {isLoggedIn && (
-        <div className="edit-mode-banner">
-          ✏️ Edit Mode Active - Click any text/media to edit
-        </div>
-      )}
+        {/* Custom Cursor */}
+        <CustomCursor />
 
-      <main>
-        <Hero />
-        <About />
-        <Skills />
-        <Projects />
-        <Education />
-        <PESEBranch />
-        <Assignments />
-        <WeeklyLearning />
-      </main>
+        <Navbar />
+        <LoginModal />
 
-      <Footer />
-    </div>
+        {/* Edit Mode Banner */}
+        {isLoggedIn && (
+          <div className="edit-mode-banner">
+            ⚡ Edit Mode Active - Click to edit
+          </div>
+        )}
+
+        <main>
+          <Hero />
+          <About />
+          <Skills />
+          <Projects />
+          <Education />
+          <PESEBranch />
+          <Assignments />
+          <WeeklyLearning />
+        </main>
+
+        <Footer />
+      </div>
+    </SmoothScroll>
   )
 }
 
