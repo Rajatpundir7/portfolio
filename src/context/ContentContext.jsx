@@ -1,4 +1,11 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import {
+    loadContentFromFirebase,
+    saveContentToFirebase,
+    isFirebaseReady,
+    uploadImage,
+    uploadVideo
+} from '../firebase/config';
 
 const ContentContext = createContext();
 
@@ -211,15 +218,67 @@ const defaultContent = {
 };
 
 export const ContentProvider = ({ children }) => {
-    const [content, setContent] = useState(() => {
-        // Clear old localStorage data to use new defaults
-        localStorage.removeItem('portfolio_content');
-        return defaultContent;
-    });
+    const [content, setContent] = useState(defaultContent);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveStatus, setSaveStatus] = useState(null); // 'success', 'error', null
 
+    // Load content from Firebase on mount
     useEffect(() => {
+        const loadContent = async () => {
+            setIsLoading(true);
+
+            // Try Firebase first
+            if (isFirebaseReady()) {
+                const firebaseContent = await loadContentFromFirebase();
+                if (firebaseContent) {
+                    setContent(firebaseContent);
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
+            // Fallback to localStorage
+            const saved = localStorage.getItem('portfolio_content');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    setContent(parsed);
+                } catch (e) {
+                    console.error('Error parsing localStorage:', e);
+                }
+            }
+
+            setIsLoading(false);
+        };
+
+        loadContent();
+    }, []);
+
+    // Save to Firebase and localStorage whenever content changes
+    useEffect(() => {
+        if (isLoading) return; // Don't save during initial load
+
+        // Always save to localStorage as backup
         localStorage.setItem('portfolio_content', JSON.stringify(content));
-    }, [content]);
+
+        // Save to Firebase (debounced)
+        const saveToFirebase = async () => {
+            if (isFirebaseReady()) {
+                setIsSaving(true);
+                const success = await saveContentToFirebase(content);
+                setIsSaving(false);
+                setSaveStatus(success ? 'success' : 'error');
+
+                // Clear status after 3 seconds
+                setTimeout(() => setSaveStatus(null), 3000);
+            }
+        };
+
+        // Debounce Firebase saves
+        const timeoutId = setTimeout(saveToFirebase, 1000);
+        return () => clearTimeout(timeoutId);
+    }, [content, isLoading]);
 
     const updateContent = (section, data) => {
         setContent(prev => ({
@@ -306,9 +365,30 @@ export const ContentProvider = ({ children }) => {
         localStorage.removeItem('portfolio_content');
     };
 
+    // File upload functions
+    const uploadImageFile = async (file) => {
+        if (isFirebaseReady()) {
+            return await uploadImage(file);
+        }
+        // Fallback: create local URL (not permanent)
+        return URL.createObjectURL(file);
+    };
+
+    const uploadVideoFile = async (file) => {
+        if (isFirebaseReady()) {
+            return await uploadVideo(file);
+        }
+        // Fallback: create local URL (not permanent)
+        return URL.createObjectURL(file);
+    };
+
     return (
         <ContentContext.Provider value={{
             content,
+            isLoading,
+            isSaving,
+            saveStatus,
+            isFirebaseConnected: isFirebaseReady(),
             updateContent,
             updateNestedContent,
             addPeseWeek,
@@ -318,7 +398,9 @@ export const ContentProvider = ({ children }) => {
             addWeeklyLearning,
             updateWeeklyLearning,
             deleteWeeklyLearning,
-            resetToDefault
+            resetToDefault,
+            uploadImageFile,
+            uploadVideoFile
         }}>
             {children}
         </ContentContext.Provider>
