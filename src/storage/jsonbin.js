@@ -149,6 +149,26 @@ export const convertGoogleDriveLink = (shareLink) => {
 };
 
 /**
+ * Convert Google Drive share link to preview link for videos
+ * Videos need the /preview format to work in iframes
+ */
+export const convertGoogleDriveLinkForVideo = (shareLink) => {
+    const match = shareLink.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (match) {
+        const fileId = match[1];
+        return `https://drive.google.com/file/d/${fileId}/preview`;
+    }
+    return shareLink;
+};
+
+/**
+ * Check if a URL is a Google Drive link
+ */
+export const isGoogleDriveLink = (url) => {
+    return url && url.includes('drive.google.com');
+};
+
+/**
  * Convert Imgur share link to direct image link
  */
 export const convertImgurLink = (shareLink) => {

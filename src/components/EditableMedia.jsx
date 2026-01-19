@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useContent } from '../context/ContentContext';
+import { convertGoogleDriveLinkForVideo, isGoogleDriveLink } from '../storage/jsonbin';
 
 const EditableMedia = ({
     type = 'image', // 'image' or 'video'
@@ -221,15 +222,32 @@ const EditableMedia = ({
                                 }}
                             />
                         ) : (
-                            <video
-                                src={displayValue}
-                                controls
-                                style={{
-                                    maxWidth: '100%',
-                                    maxHeight: '250px',
-                                    borderRadius: '12px'
-                                }}
-                            />
+                            isGoogleDriveLink(displayValue) ? (
+                                <iframe
+                                    src={convertGoogleDriveLinkForVideo(displayValue)}
+                                    style={{
+                                        maxWidth: '100%',
+                                        width: '100%',
+                                        aspectRatio: '16/9',
+                                        maxHeight: '250px',
+                                        borderRadius: '12px',
+                                        border: 'none'
+                                    }}
+                                    allow="autoplay; encrypted-media"
+                                    allowFullScreen
+                                    title="Video Preview"
+                                />
+                            ) : (
+                                <video
+                                    src={displayValue}
+                                    controls
+                                    style={{
+                                        maxWidth: '100%',
+                                        maxHeight: '250px',
+                                        borderRadius: '12px'
+                                    }}
+                                />
+                            )
                         )}
                     </div>
                 )}
@@ -304,11 +322,26 @@ const EditableMedia = ({
                     />
                 ) : (
                     <div className="video-container">
-                        <video
-                            src={displayValue}
-                            controls
-                            style={{ width: '100%', borderRadius: '16px' }}
-                        />
+                        {isGoogleDriveLink(displayValue) ? (
+                            <iframe
+                                src={convertGoogleDriveLinkForVideo(displayValue)}
+                                style={{
+                                    width: '100%',
+                                    aspectRatio: '16/9',
+                                    borderRadius: '16px',
+                                    border: 'none'
+                                }}
+                                allow="autoplay; encrypted-media"
+                                allowFullScreen
+                                title="Video"
+                            />
+                        ) : (
+                            <video
+                                src={displayValue}
+                                controls
+                                style={{ width: '100%', borderRadius: '16px' }}
+                            />
+                        )}
                     </div>
                 )}
             </div>
