@@ -21,8 +21,8 @@ const EditableMedia = ({
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                alert('File size must be less than 5MB. For larger files, upload to Google Drive and paste the link.');
+            if (file.size > 25 * 1024 * 1024) {
+                alert('File size must be less than 25MB. For larger files, upload to a video hosting service and paste the link.');
                 return;
             }
 
@@ -190,7 +190,7 @@ const EditableMedia = ({
                             <span style={{ fontSize: '2rem' }}>{type === 'image' ? '🖼️' : '🎬'}</span>
                             <p>Click to upload {type}</p>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                Max 5MB (for larger files, use URL mode with Google Drive)
+                                Max 25MB (for larger files, use URL mode)
                             </p>
                         </div>
                     </div>
