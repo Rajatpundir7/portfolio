@@ -14,8 +14,8 @@ const Hero = () => {
     const roles = [
         'AI & Machine Learning Engineer',
         'Deep Learning Specialist',
-        'Computer Vision Expert',
-        'Full-Stack Developer',
+        'Computer Vision Developer',
+        'Full-Stack AI Developer',
         'Problem Solver'
     ];
 
