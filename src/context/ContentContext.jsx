@@ -187,6 +187,21 @@ export const ContentProvider = ({ children }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState(null);
 
+    // Deep merge helper - merges source into target, preferring source values unless they're null
+    const deepMerge = (target, source) => {
+        const result = { ...target };
+        for (const key in source) {
+            if (source[key] !== null && source[key] !== undefined) {
+                if (typeof source[key] === 'object' && !Array.isArray(source[key]) && source[key] !== null) {
+                    result[key] = deepMerge(target[key] || {}, source[key]);
+                } else {
+                    result[key] = source[key];
+                }
+            }
+        }
+        return result;
+    };
+
     // Load content on mount
     useEffect(() => {
         const loadContent = async () => {
@@ -196,7 +211,9 @@ export const ContentProvider = ({ children }) => {
             if (isCloudReady()) {
                 const cloudContent = await loadContentFromCloud();
                 if (cloudContent) {
-                    setContent(cloudContent);
+                    // Merge cloud content with defaults to preserve new default values
+                    const mergedContent = deepMerge(defaultContent, cloudContent);
+                    setContent(mergedContent);
                     setIsLoading(false);
                     return;
                 }
@@ -206,7 +223,10 @@ export const ContentProvider = ({ children }) => {
             const saved = localStorage.getItem('portfolio_content');
             if (saved) {
                 try {
-                    setContent(JSON.parse(saved));
+                    const parsedContent = JSON.parse(saved);
+                    // Merge localStorage content with defaults
+                    const mergedContent = deepMerge(defaultContent, parsedContent);
+                    setContent(mergedContent);
                 } catch (e) {
                     console.error('Error parsing localStorage:', e);
                 }
