@@ -15,7 +15,7 @@ const defaultContent = {
         name: "Rajat Pundir",
         title: "AI & Machine Learning Engineer",
         subtitle: "Third-year B.Tech student specializing in AI & ML with expertise in Deep Learning, Computer Vision, and Reinforcement Learning",
-        introVideo: null
+        introVideo: "https://drive.google.com/file/d/1sV-nOEBta4j7Y_2jZHES5Hsj4IZ9Ov6s/view?usp=drive_link"
     },
     about: {
         photo: null,
