@@ -1,90 +1,86 @@
-import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { FiDownload } from 'react-icons/fi'
 
-const Navbar = () => {
-    const { isLoggedIn, openLogin, logout } = useAuth();
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+const navLinks = [
+    { label: 'About', href: '#about' },
+    { label: 'Skills', href: '#skills' },
+    { label: 'Projects', href: '#projects' },
+    { label: 'Achievements', href: '#achievements' },
+    { label: 'Contact', href: '#contact' },
+]
 
-    const scrollToSection = (id) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-        setMobileMenuOpen(false);
-    };
+export default function Navbar() {
+    const [scrolled, setScrolled] = useState(false)
+    const [mobileOpen, setMobileOpen] = useState(false)
 
-    const toggleMobileMenu = () => {
-        setMobileMenuOpen(!mobileMenuOpen);
-    };
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 50)
+        window.addEventListener('scroll', onScroll)
+        return () => window.removeEventListener('scroll', onScroll)
+    }, [])
+
+    const closeMobile = () => setMobileOpen(false)
 
     return (
-        <>
-            <nav className="navbar">
-                <div className="container navbar-content">
-                    <a href="#" className="navbar-brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                        RP
-                    </a>
+        <motion.nav
+            className={`navbar ${scrolled ? 'scrolled' : ''}`}
+            initial={{ y: -80 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
+            <div className="container">
+                <div className="navbar-inner">
+                    <a href="#" className="navbar-brand">RP.</a>
 
                     <ul className="navbar-links">
-                        <li><a href="#about" onClick={(e) => { e.preventDefault(); scrollToSection('about'); }}>About</a></li>
-                        <li><a href="#skills" onClick={(e) => { e.preventDefault(); scrollToSection('skills'); }}>Skills</a></li>
-                        <li><a href="#projects" onClick={(e) => { e.preventDefault(); scrollToSection('projects'); }}>Projects</a></li>
-                        <li><a href="#pese" onClick={(e) => { e.preventDefault(); scrollToSection('pese'); }}>PESE Class</a></li>
-                        <li><a href="#assignments" onClick={(e) => { e.preventDefault(); scrollToSection('assignments'); }}>Assignments</a></li>
-                        <li><a href="#learning" onClick={(e) => { e.preventDefault(); scrollToSection('learning'); }}>Learning</a></li>
+                        {navLinks.map((l) => (
+                            <li key={l.href}>
+                                <a href={l.href}>{l.label}</a>
+                            </li>
+                        ))}
                     </ul>
 
                     <div className="navbar-actions">
-                        {isLoggedIn ? (
-                            <>
-                                <span style={{
-                                    padding: '8px 16px',
-                                    background: 'rgba(16, 185, 129, 0.2)',
-                                    borderRadius: '20px',
-                                    color: '#10b981',
-                                    fontSize: '0.9rem',
-                                    fontWeight: '500'
-                                }}>
-                                    ✏️ Edit Mode
-                                </span>
-                                <button className="btn btn-secondary" onClick={logout}>
-                                    Logout
-                                </button>
-                            </>
-                        ) : (
-                            <button className="btn btn-primary" onClick={openLogin}>
-                                🔐 Admin
-                            </button>
-                        )}
+                        <a
+                            href="https://drive.google.com/file/d/1Ey_placeholder/view"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-primary navbar-resume-btn"
+                        >
+                            <FiDownload /> Resume
+                        </a>
 
-                        {/* Mobile Menu Toggle */}
                         <button
-                            className={`mobile-menu-toggle ${mobileMenuOpen ? 'active' : ''}`}
-                            onClick={toggleMobileMenu}
+                            className={`mobile-toggle ${mobileOpen ? 'active' : ''}`}
+                            onClick={() => setMobileOpen(!mobileOpen)}
                             aria-label="Toggle menu"
                         >
-                            <span></span>
-                            <span></span>
-                            <span></span>
+                            <span />
+                            <span />
+                            <span />
                         </button>
                     </div>
                 </div>
-            </nav>
-
-            {/* Mobile Navigation Overlay */}
-            <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`}>
-                <ul>
-                    <li><a href="#about" onClick={(e) => { e.preventDefault(); scrollToSection('about'); }}>About</a></li>
-                    <li><a href="#skills" onClick={(e) => { e.preventDefault(); scrollToSection('skills'); }}>Skills</a></li>
-                    <li><a href="#projects" onClick={(e) => { e.preventDefault(); scrollToSection('projects'); }}>Projects</a></li>
-                    <li><a href="#pese" onClick={(e) => { e.preventDefault(); scrollToSection('pese'); }}>PESE Class</a></li>
-                    <li><a href="#assignments" onClick={(e) => { e.preventDefault(); scrollToSection('assignments'); }}>Assignments</a></li>
-                    <li><a href="#learning" onClick={(e) => { e.preventDefault(); scrollToSection('learning'); }}>Learning</a></li>
-                    <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>Contact</a></li>
-                </ul>
             </div>
-        </>
-    );
-};
 
-export default Navbar;
+            {/* Mobile Nav */}
+            <div className={`mobile-nav ${mobileOpen ? 'active' : ''}`}>
+                {navLinks.map((l) => (
+                    <a key={l.href} href={l.href} onClick={closeMobile}>
+                        {l.label}
+                    </a>
+                ))}
+                <a
+                    href="https://drive.google.com/file/d/1Ey_placeholder/view"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary"
+                    style={{ marginTop: 16 }}
+                >
+                    <FiDownload /> Resume
+                </a>
+            </div>
+        </motion.nav>
+    )
+}
